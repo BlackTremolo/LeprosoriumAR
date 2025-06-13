@@ -6,24 +6,20 @@ require 'sinatra/activerecord'
 set :database, {adapter: "sqlite3", database: "leprosorium.db"}
 
 class Post < ActiveRecord::Base
+	has_many :comments 
+	validates :author, presence: true 
+	validates :content, presence: true
 end
 
 class Comment < ActiveRecord::Base
+	validates :content, presence: true
 end
 
 # before вызывается каждый раз при перезагрузке
 # любой страницы
 before do 
-	
+	@posts = Post.all
 end
-
-	# @db.execute 'CREATE TABLE IF NOT EXISTS Comments (
-	# ID	INTEGER,
-	# created_date DATA,
-	# content	TEXT,
-	# post_id INTEGER,
-	# PRIMARY KEY("ID" AUTOINCREMENT))'
-
 
 # обработчик get запроса /
 get '/' do
@@ -42,32 +38,34 @@ end
 post '/new' do
   
 	@p = Post.new params[:post]
-	@p.save
-
-	erb :new
+	
+	if @p.save
+		erb :new
+	else
+		@error  = @p.errors.full_messages.first
+		erb :new
+	end
 end
 
 get '/post/:id' do
 
 	@post = Post.find(params[:id])
-
-# 	@comments = @db.execute 'select * from Comments where post_id = ? order by id',[post_id]
+	
+	@comments = Comment.all
+	#find(params[:post_id])
 
  	erb :post
  end
 
-# post '/post/:post_id' do
-# 	post_id = params[:post_id]
-# 	content = params[:content]	
+  post '/post/:id' do
+  	@c = Comment.new params[:comment]	
+	@c.post_id = params[:id]
 	
-# 	# if content.length <= 0 
-#   	#  	@error = 'Type comment'
-#   	#  	return /post/post_id
-# 	#  end
+	if @c.save
+		erb :index
+	else
+		@error  = @c.errors.full_messages.first
+		erb :index
+	end
 	
-# 	@db.execute 'insert into Comments 
-# 	(content, created_date, post_id) 
-# 	values (?, datetime (), ?)', [content, post_id]
-	
-# 	redirect to('/post/' + post_id)
-# end
+ end

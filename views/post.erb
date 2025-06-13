@@ -11,3 +11,21 @@
 </p>			
 <br>
 
+<h4>Comments:</h4>
+<br>
+<form action="/post/<%= @post.id %>" method="POST">
+	<textarea name="comment[content]" class="form-control" placeholder="Type comment text here" rows="6"></textarea>
+	<br>
+	<button type="submit" class="btn btn-primary">Add comment</button>
+</form>
+<br>
+
+<% @comments.each do |comment| %>
+<p>
+ 	<%= comment.content %>
+	<br>
+	<br>
+ 	<span style="font-size: 75%; color: #999">Added at <%= comment.created_at %></span>
+ 	<hr>
+</p>			
+<%end%>
